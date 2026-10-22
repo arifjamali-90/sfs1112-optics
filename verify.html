@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Optics Slip Checker</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root { --bg: #f4f7f8; --surface: #fff; --ink: #0b2545; --muted: #5b6b7f; --line: #d6dee6; --teal: #13807a; --good: #2e7d4f; --good-soft: #e8f4ec; --bad: #b03a2e; --bad-soft: #f9e9e7 }
+@media (prefers-color-scheme: dark) { :root { --bg: #0c1622; --surface: #142233; --ink: #e8eef4; --muted: #9fb0c3; --line: #2a3b50; --teal: #4fc1b8; --good: #6fcf97; --good-soft: #163325; --bad: #f08a7e; --bad-soft: #3a1d1a; color-scheme: dark } }
+* { box-sizing: border-box }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 "Source Sans 3", Calibri, system-ui, sans-serif }
+main { max-width: 560px; margin: 0 auto; padding: 32px max(16px, env(safe-area-inset-left, 0px)) 48px }
+h1 { font-family: "Source Serif 4", Cambria, Georgia, serif; margin: 0 0 6px; font-size: 30px }
+p { color: var(--muted); margin: 0 0 18px }
+form { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; display: grid; gap: 8px }
+label { font-weight: 600; font-size: 15px }
+input { font: inherit; padding: 9px 12px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); font-variant-numeric: tabular-nums }
+.row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px }
+.row div { display: grid; gap: 6px; min-width: 0 }
+button { font: inherit; font-weight: 700; border: 0; border-radius: 8px; padding: 10px 18px; background: var(--teal); color: #fff; justify-self: start; margin-top: 8px; cursor: pointer }
+.out { margin-top: 16px; border-radius: 8px; padding: 12px 16px }
+.ok { background: var(--good-soft); border-left: 4px solid var(--good) }
+.no { background: var(--bad-soft); border-left: 4px solid var(--bad) }
+code { font-size: 18px; letter-spacing: .06em }
+</style>
+</head>
+<body>
+<main>
+  <h1>Optics slip checker</h1>
+  <p>For the lecturer. Type the details from a student's completion slip exactly as shown; the expected check code is recalculated and compared.</p>
+  <form id="f">
+    <label for="name">Name</label><input id="name" required>
+    <label for="matric">Matric number</label><input id="matric" required>
+    <label for="day">Completed date (YYYY-MM-DD)</label><input id="day" placeholder="2026-12-03" required>
+    <div class="row">
+      <div><label for="ok">Checkpoints correct</label><input id="ok" inputmode="numeric" required></div>
+      <div><label for="first">On first try</label><input id="first" inputmode="numeric" required></div>
+      <div><label for="exit">Exit ticket</label><input id="exit" inputmode="numeric" required></div>
+    </div>
+    <label for="code">Check code on the slip</label><input id="code" placeholder="ABCD-EFGH" required>
+    <button type="submit">Check slip</button>
+  </form>
+  <div id="out" class="out" hidden></div>
+</main>
+<script>
+function checkCode(name, matric, ok, first, exit, day) {
+  const str = ["SFS1112-OPTICS-A261", name.trim().toUpperCase().replace(/\s+/g, " "), matric.trim().toUpperCase().replace(/\s+/g, ""), ok, first, exit, day].join("|");
+  let h1 = 2166136261 >>> 0, h2 = 0x9e3779b9 >>> 0;
+  for (const ch of str) { const c = ch.codePointAt(0); h1 = Math.imul(h1 ^ c, 16777619) >>> 0; h2 = Math.imul(h2 ^ c, 2246822507) >>> 0; h2 = (h2 ^ (h2 >>> 13)) >>> 0; }
+  const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let out = "";
+  for (let i = 0; i < 4; i++) { out += A.charAt(h1 & 31); h1 >>>= 5; }
+  for (let i = 0; i < 4; i++) { out += A.charAt(h2 & 31); h2 >>>= 5; }
+  return out.slice(0, 4) + "-" + out.slice(4);
+}
+document.getElementById("f").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const v = (id) => document.getElementById(id).value.trim();
+  const expected = checkCode(v("name"), v("matric"), parseInt(v("ok"), 10), parseInt(v("first"), 10), parseInt(v("exit"), 10), v("day"));
+  const given = v("code").toUpperCase().replace(/\s+/g, "");
+  const out = document.getElementById("out"); out.hidden = false;
+  if (given === expected) { out.className = "out ok"; out.innerHTML = "<b>Matches.</b> The details on this slip are the ones the lecture page produced."; }
+  else { out.className = "out no"; out.innerHTML = "<b>Does not match.</b> Expected <code></code>. Check for typos in the name, matric number or date before treating the slip as edited."; out.querySelector("code").textContent = expected; }
+});
+</script>
+</body>
+</html>
