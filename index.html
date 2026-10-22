@@ -41,6 +41,7 @@ h1 { font-family: var(--f-display); font-weight: 700; font-size: clamp(28px, 4vw
 .locked-stage strong { font-family: var(--f-display); font-size: 22px; color: #fff }
 .cc { position: absolute; left: 4%; right: 4%; bottom: 3.2%; text-align: center; pointer-events: none }
 .cc span { display: inline; background: rgba(0, 0, 0, .78); color: #fff; font-size: clamp(13px, 1.9vw, 21px); line-height: 1.45; padding: 2px 8px; border-radius: 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone }
+.skip-note { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); max-width: 90%; background: rgba(11, 37, 69, .92); color: #fff; font-weight: 600; font-size: 15px; padding: 8px 14px; border-radius: 8px; text-align: center }
 .cc-toggle { font-size: 14px; padding: 6px 12px }
 .pause-card { position: absolute; inset: auto 0 0 0; background: rgba(184, 102, 26, .96); color: #fff; padding: 18px 22px; display: grid; gap: 10px }
 .pause-card .lbl { font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .9 }
@@ -110,6 +111,7 @@ footer a { color: var(--teal) }
           <source src="media/seg1.mp4" type="video/mp4">
         </video>
         <div class="cc" id="cc" aria-hidden="true"></div>
+        <div class="skip-note" id="skipNote" role="status" hidden></div>
         <div class="locked-stage" id="lockedStage" hidden><strong id="lockTitle">Coming soon</strong><span id="lockText"></span></div>
         <div class="pause-card" id="pauseCard" hidden role="dialog" aria-labelledby="pausePrompt">
           <span class="lbl">Pause and try</span>
@@ -157,7 +159,8 @@ const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } c
 
 const $ = (id) => document.getElementById(id);
 const vid = $("vid");
-let cur = 0, handled = new Set(), ended = false, tries = 0;
+let cur = 0, handled = new Set(), ended = false, tries = 0, maxT = 0, snapping = false, noteTimer = 0;
+if (!state.watched || typeof state.watched !== "object") state.watched = {};
 
 function unlocked(i) { return i === 0 || state.done.includes(i - 1); }
 function renderRail() {
@@ -177,7 +180,7 @@ function renderRail() {
 }
 
 function load(i) {
-  cur = i; handled = new Set(); ended = false; tries = 0;
+  cur = i; handled = new Set(); ended = false; tries = 0; maxT = state.watched[i] || 0; $("skipNote").hidden = true;
   const s = SEGMENTS[i];
   $("segTitle").textContent = i === SEGMENTS.length - 1 ? s.title : `${i + 1}. ${s.title}`;
   $("segMeta").textContent = (i === SEGMENTS.length - 1 ? "Closing" : `Segment ${i + 1} of ${SEGMENTS.length - 1}`) + ` · about ${s.mins.toFixed(1)} min`;
@@ -197,7 +200,7 @@ function renderCP() {
   const s = SEGMENTS[cur], box = $("cp");
   box.className = "cp"; box.innerHTML = "";
   if (!s.cp) { box.classList.add("wait"); box.textContent = "No checkpoint in the pilot for this segment."; return; }
-  if (!ended && !state.done.includes(cur)) {
+  if (!ended && !state.done.includes(cur) && !(state.watched[cur] >= 1e9)) {
     box.classList.add("wait");
     box.innerHTML = `<span class="tag">${s.cp.type === "exit" ? "Exit ticket" : "Checkpoint " + (cur + 1)}</span><div>${s.cp.type === "exit" ? "The exit ticket" : "The checkpoint"} opens when the video ends. You can rewatch any part first.</div>`;
     return;
@@ -303,8 +306,31 @@ function renderExit(box, cp) {
   box.append(scoreBox); finish();
 }
 
+// Skip-ahead guard: on a first watch the student can rewind but not jump past the furthest point reached.
+const free = () => state.done.includes(cur);
+function note(msg) {
+  const n = $("skipNote"); n.textContent = msg; n.hidden = false;
+  clearTimeout(noteTimer); noteTimer = setTimeout(() => { n.hidden = true; }, 4500);
+}
+vid.addEventListener("loadedmetadata", () => {
+  if (!free() && maxT > 3 && maxT < 1e9 && maxT < vid.duration - 3) { snapping = true; vid.currentTime = Math.max(0, maxT - 2); note("Resuming where you stopped last time."); }
+});
+vid.addEventListener("seeking", () => {
+  if (snapping) { snapping = false; return; }
+  if (free()) return;
+  if (vid.currentTime > maxT + 1) {
+    snapping = true; vid.currentTime = maxT;
+    note("Skipping ahead is off until you have watched this video once. You can rewind any time.");
+  }
+});
+vid.addEventListener("ratechange", () => { if (vid.playbackRate > 2) vid.playbackRate = 2; });
 vid.addEventListener("timeupdate", () => {
-  const s = SEGMENTS[cur]; if (!s.pauses) return;
+  const s = SEGMENTS[cur];
+  if (!vid.seeking && vid.currentTime > maxT && vid.currentTime - maxT < 2.5) {
+    maxT = vid.currentTime;
+    if (Math.floor(maxT) % 5 === 0) { state.watched[cur] = maxT; save(); }
+  }
+  if (!s.pauses) return;
   for (const p of s.pauses) {
     if (!handled.has(p.t) && vid.currentTime >= p.t && vid.currentTime < p.t + 1.5) {
       handled.add(p.t); vid.pause();
@@ -322,10 +348,12 @@ function drawCC() {
 vid.addEventListener("timeupdate", drawCC);
 vid.addEventListener("seeked", drawCC);
 $("ccBtn").addEventListener("click", () => { ccOn = !ccOn; $("ccBtn").textContent = ccOn ? "Captions on" : "Captions off"; $("ccBtn").setAttribute("aria-pressed", String(ccOn)); drawCC(); });
-vid.addEventListener("seeked", () => { const s = SEGMENTS[cur]; (s.pauses || []).forEach((p) => { if (vid.currentTime > p.t + 1.5) handled.add(p.t); }); });
+vid.addEventListener("seeked", () => { if (!free()) return; const s = SEGMENTS[cur]; (s.pauses || []).forEach((p) => { if (vid.currentTime > p.t + 1.5) handled.add(p.t); }); });
 vid.addEventListener("play", () => { $("pauseCard").hidden = true; });
 $("pauseGo").addEventListener("click", () => { $("pauseCard").hidden = true; vid.play().catch(() => {}); });
-vid.addEventListener("ended", () => { ended = true; renderCP(); $("cp").scrollIntoView({ behavior: "smooth", block: "start" }); });
+vid.addEventListener("ended", () => {
+  if (!free() && maxT < vid.duration - 3) return;
+  state.watched[cur] = 1e9; save(); ended = true; renderCP(); $("cp").scrollIntoView({ behavior: "smooth", block: "start" }); });
 
 ["h1", "h2", "h3", "h4"].forEach((id) => {
   const el = $(id); el.checked = !!state.home[id];
