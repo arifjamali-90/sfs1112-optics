@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>SFS1112 Optics Lecture</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: lecture player on the left, chapter rail on the right; stacks to one column on phones */
+:root {
+  --bg: #f4f7f8; --surface: #ffffff; --ink: #0b2545; --muted: #5b6b7f; --line: #d6dee6;
+  --teal: #13807a; --teal-soft: #e3f2f0; --amber: #b8661a; --amber-soft: #fbefe2; --good: #2e7d4f; --good-soft: #e8f4ec; --bad: #b03a2e; --bad-soft: #f9e9e7;
+  --stage: #0b2545;
+  --f-display: "Source Serif 4", Cambria, Georgia, serif;
+  --f-body: "Source Sans 3", Calibri, "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0c1622; --surface: #142233; --ink: #e8eef4; --muted: #9fb0c3; --line: #2a3b50;
+  --teal: #4fc1b8; --teal-soft: #15343a; --amber: #f0a65a; --amber-soft: #3a2a18; --good: #6fcf97; --good-soft: #163325; --bad: #f08a7e; --bad-soft: #3a1d1a; --stage: #06101b; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0c1622; --surface: #142233; --ink: #e8eef4; --muted: #9fb0c3; --line: #2a3b50;
+  --teal: #4fc1b8; --teal-soft: #15343a; --amber: #f0a65a; --amber-soft: #3a2a18; --good: #6fcf97; --good-soft: #163325; --bad: #f08a7e; --bad-soft: #3a1d1a; --stage: #06101b; color-scheme: dark }
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.55 }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 48px }
+header { display: grid; gap: 6px; margin-bottom: 22px }
+.eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--teal) }
+h1 { font-family: var(--f-display); font-weight: 700; font-size: clamp(28px, 4vw, 40px); line-height: 1.15; margin: 0; text-wrap: balance }
+.lede { margin: 4px 0 0; color: var(--muted); max-width: 68ch }
+.pilot { display: inline-flex; gap: 8px; align-items: center; margin-top: 10px; padding: 6px 12px; border-radius: 999px; background: var(--amber-soft); color: var(--amber); font-weight: 600; font-size: 14px; width: fit-content }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start }
+@media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr) } }
+.stage { position: relative; background: var(--stage); border-radius: 10px; overflow: hidden; aspect-ratio: 16 / 9; max-width: 100% }
+.stage video { width: 100%; height: 100%; display: block; background: var(--stage) }
+.locked-stage { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; color: #cfe1ef; padding: 24px; gap: 6px }
+.locked-stage strong { font-family: var(--f-display); font-size: 22px; color: #fff }
+.cc { position: absolute; left: 4%; right: 4%; bottom: 3.2%; text-align: center; pointer-events: none }
+.cc span { display: inline; background: rgba(0, 0, 0, .78); color: #fff; font-size: clamp(13px, 1.9vw, 21px); line-height: 1.45; padding: 2px 8px; border-radius: 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone }
+.cc-toggle { font-size: 14px; padding: 6px 12px }
+.pause-card { position: absolute; inset: auto 0 0 0; background: rgba(184, 102, 26, .96); color: #fff; padding: 18px 22px; display: grid; gap: 10px }
+.pause-card .lbl { font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .9 }
+.pause-card p { margin: 0; font-size: clamp(17px, 2.2vw, 22px); font-weight: 600; line-height: 1.3 }
+.pause-card button { justify-self: start }
+.now { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; margin: 14px 0 4px }
+.now h2 { font-family: var(--f-display); font-size: 24px; margin: 0 }
+.now .meta { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums }
+button, .btn { font: inherit; font-weight: 700; border: 0; border-radius: 8px; padding: 10px 18px; cursor: pointer; background: var(--teal); color: #fff }
+button.ghost { background: transparent; color: var(--teal); border: 1.5px solid var(--teal) }
+.pause-card button { background: #fff; color: #7a3f0b }
+button:disabled { opacity: .45; cursor: not-allowed }
+button:focus-visible, input:focus-visible, .chap:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px }
+.cp { margin-top: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px 22px; display: grid; gap: 14px }
+.cp .tag { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--amber) }
+.cp h3 { margin: 0; font-family: var(--f-display); font-size: 21px; line-height: 1.3; text-wrap: balance }
+.cp.wait { color: var(--muted) }
+.opts { display: grid; gap: 10px }
+.opt { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; align-items: center; text-align: left; background: var(--bg); color: var(--ink); border: 1.5px solid var(--line); font-weight: 600; padding: 10px 14px }
+.opt .k { width: 34px; height: 34px; border-radius: 50%; display: grid; place-content: center; background: var(--amber); color: #fff; font-weight: 700 }
+.opt:disabled { opacity: 1; cursor: default }
+.opt.right { border-color: var(--good); background: var(--good-soft) }
+.opt.wrong { border-color: var(--bad); background: var(--bad-soft) }
+.num { display: flex; flex-wrap: wrap; gap: 10px; align-items: center }
+.num input { font: inherit; font-size: 18px; width: 9em; padding: 9px 12px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); font-variant-numeric: tabular-nums }
+.fb { border-radius: 8px; padding: 12px 16px; font-size: 15.5px }
+.fb.ok { background: var(--good-soft); border-left: 4px solid var(--good) }
+.fb.no { background: var(--bad-soft); border-left: 4px solid var(--bad) }
+.fb b { display: block; margin-bottom: 2px }
+aside { display: grid; gap: 18px }
+.rail { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px }
+.rail h4, .home h4 { margin: 8px 10px 6px; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted) }
+.chap { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 10px; align-items: center; width: 100%; background: transparent; color: var(--ink); font-weight: 600; text-align: left; padding: 9px 10px; border-radius: 8px }
+.chap:hover:not(:disabled) { background: var(--teal-soft) }
+.chap.cur { background: var(--teal-soft) }
+.chap .n { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--line); display: grid; place-content: center; font-size: 13px; font-variant-numeric: tabular-nums }
+.chap.done .n { background: var(--good); border-color: var(--good); color: #fff }
+.chap.cur .n { border-color: var(--teal); color: var(--teal) }
+.chap .d { color: var(--muted); font-weight: 400; font-size: 13px; font-variant-numeric: tabular-nums }
+.chap:disabled { opacity: 1; cursor: default; color: var(--muted) }
+.chap .t { min-width: 0 }
+.home { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px 12px }
+.home label { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 10px; padding: 6px 0; font-size: 15px; cursor: pointer }
+.home input { margin-top: 4px; accent-color: var(--teal) }
+.prog { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin: 4px 10px 10px }
+.prog i { display: block; height: 100%; background: var(--teal); width: 0; transition: width .3s }
+footer { margin-top: 36px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; display: grid; gap: 8px }
+footer a { color: var(--teal) }
+.links { display: flex; flex-wrap: wrap; gap: 8px 18px }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important } }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">SFS1112 Physics for Life Sciences · Week 10</div>
+    <h1>Light and Optics</h1>
+    <p class="lede">Ten short videos, about 30 minutes in all. Watch a video, answer its checkpoint, and the next one unlocks. Keep a calculator nearby, and when a video stops on a <strong>Pause and try</strong> card, try the task before you continue.</p>
+    <div class="pilot" role="note">Pilot: Segment 1 and Checkpoint 1 only. The other nine follow once the script is approved.</div>
+  </header>
+
+  <div class="grid">
+    <main>
+      <div class="stage" id="stage">
+        <video id="vid" controls playsinline preload="metadata" poster="media/seg1.jpg">
+          <source src="media/seg1.mp4" type="video/mp4">
+        </video>
+        <div class="cc" id="cc" aria-hidden="true"></div>
+        <div class="locked-stage" id="lockedStage" hidden><strong id="lockTitle">Coming soon</strong><span id="lockText"></span></div>
+        <div class="pause-card" id="pauseCard" hidden role="dialog" aria-labelledby="pausePrompt">
+          <span class="lbl">Pause and try</span>
+          <p id="pausePrompt"></p>
+          <button id="pauseGo" type="button">I've thought about it, continue</button>
+        </div>
+      </div>
+      <div class="now"><h2 id="segTitle"></h2><span class="meta" id="segMeta"></span><button type="button" class="ghost cc-toggle" id="ccBtn" aria-pressed="true">Captions on</button></div>
+      <section class="cp" id="cp" aria-live="polite"></section>
+    </main>
+
+    <aside>
+      <nav class="rail" aria-label="Lecture segments">
+        <h4>Segments</h4>
+        <div class="prog" aria-hidden="true"><i id="progBar"></i></div>
+        <div id="chapters"></div>
+      </nav>
+      <div class="home">
+        <h4>Try at home</h4>
+        <label><input type="checkbox" id="h1"> <span>Coin in a cup: make it reappear with water</span></label>
+        <label><input type="checkbox" id="h2"> <span>Mirror: do you only need half your height?</span></label>
+        <label><input type="checkbox" id="h3"> <span>Old CD and a phone torch: a spectrum on the wall</span></label>
+        <label><input type="checkbox" id="h4"> <span>Polarized sunglasses against a phone screen</span></label>
+      </div>
+    </aside>
+  </div>
+
+  <footer>
+    <div>Script and slides by Dr. Muhamad Arif Mohamad Jamali, Bachelor of Food Biotechnology, FST, USIM. Narration uses a synthetic voice; the presenter is an illustrated character.</div>
+    <div class="links">
+      <a href="https://phet.colorado.edu/en/simulations/bending-light" target="_blank" rel="noopener">PhET: Bending Light</a>
+      <a href="https://phet.colorado.edu/en/simulations/geometric-optics" target="_blank" rel="noopener">PhET: Geometric Optics</a>
+      <a href="https://phet.colorado.edu/en/simulations/wave-interference" target="_blank" rel="noopener">PhET: Wave Interference</a>
+    </div>
+    <div>Reading: OpenStax College Physics 2e, Ch. 25–27 and §29.3; Newman, Physics of the Life Sciences, Ch. 19–22.</div>
+  </footer>
+</div>
+
+<script>
+const CAPS1 = [[0.6, 7.0, "Assalamualaikum, and welcome to Light and Optics for SFS1112, Physics for Life Sciences."], [7.0, 7.88, "I'm Dr Arif."], [7.88, 16.24, "You are hearing a synthetic voice reading a script I wrote for you, so the words are mine even if the voice is not."], [16.24, 21.26, "This lecture covers Optics one and two together, in ten short videos."], [21.26, 28.25, "After each video, answer the checkpoint question, read the feedback, and the next video unlocks."], [28.25, 31.16, "Keep a calculator and some paper nearby."], [31.16, 36.32, "Whenever the pause sign appears, stop the video and try the task first."], [36.32, 41.34, "Struggling a little before you see the answer is how the idea sticks."], [42.49, 44.58, "Here is a trick to try at home."], [44.58, 47.35, "Put a coin at the bottom of an empty cup."], [47.35, 50.99, "Move your head back until the rim just hides the coin."], [50.99, 54.44, "Now keep still while someone slowly pours in water."], [57.79, 61.42, "The coin reappears, and nothing moved except the light."], [61.42, 65.39, "Light from the coin travels through water and then into air."], [65.39, 71.01, "At the surface it speeds up and bends, so it now clears the rim and reaches your eye."], [71.01, 76.43, "Your brain assumes light travels in straight lines, so the coin seems to float up."], [76.43, 81.19, "This bending is called refraction, and we explain it properly in Part C."], [82.34, 86.99, "By the end, you should be able to do the eight things on this slide."], [86.99, 92.19, "Four belong to ray optics: light models, reflection, refraction, and lenses."], [92.19, 97.59, "Four belong to wave optics: interference, resolution, polarization, and colour."], [98.74, 101.39, "So the route is rays first, then waves."], [101.39, 103.23, "Which model should you use?"], [103.23, 109.0, "Use rays when everything is much bigger than the wavelength, like mirrors and lenses."], [109.0, 115.05, "Use waves when the features are close to the wavelength, like thin films and fine detail."], [115.05, 118.18, "Use photons when light is absorbed or emitted."], [121.83, 134.03, "From the waves lecture, light is an electromagnetic wave: electric and magnetic fields oscillating together, travelling at three times ten to the eight metres per second in vacuum."], [134.03, 137.29, "Its wavelength is tiny, about half a micrometre."], [137.29, 142.58, "So around everyday objects it travels in straight lines, and we can draw rays."], [142.58, 148.41, "But when light is absorbed or emitted, it arrives in packets of energy called photons."], [149.56, 152.62, "The photon model matters for food safety."], [152.62, 159.41, "The energy of one photon is E equals h f, or h c over lambda, where h is Planck's constant."], [159.41, 163.37, "Shorter wavelength means more energy in every photon."], [163.37, 164.71, "Look at the table."], [164.71, 170.38, "A microwave photon carries about one hundred-thousandth of an electron-volt."], [170.38, 178.74, "Red light carries about one point nine, and UV-C at two hundred and fifty-four nanometres about four point nine."], [178.74, 185.01, "Breaking a bond in DNA needs roughly three to five electron-volts delivered at once."], [185.01, 187.1, "One UV-C photon can do that."], [187.1, 191.28, "A microwave photon cannot, no matter how many there are."], [191.28, 199.11, "That is why microwaves heat food by shaking water molecules, while UV-C lamps damage the DNA of microbes."], [200.26, 202.27, "Let's check the UV-C number."], [202.62, 204.84, "E equals h c over lambda."], [205.19, 217.05, "Substitute: six point six three times ten to the minus thirty-four, times three times ten to the eight, divided by two hundred and fifty-four times ten to the minus nine."], [217.4, 222.11, "That gives seven point eight three times ten to the minus nineteen joules."], [222.46, 229.39, "Divide by one point six times ten to the minus nineteen to get four point nine electron-volts."], [229.74, 235.02, "Red light at six hundred and fifty nanometres gives only one point nine."], [235.02, 243.59, "A handy shortcut: energy in electron-volts is about twelve hundred and forty divided by the wavelength in nanometres."], [244.74, 246.71, "Now your first checkpoint."], [246.71, 255.37, "Which is more likely to damage the DNA of bacteria on a cutting board: a very bright red lamp, or a dim UV-C lamp?"], [255.37, 259.84, "Think about energy per photon, then answer below the video."]];
+const SEGMENTS = [
+  { title: "Welcome and what light is", mins: 4.4, src: "media/seg1.mp4", caps: CAPS1, poster: "media/seg1.jpg",
+    pauses: [{ t: 55.19, prompt: "Will the coin stay hidden, or reappear? Why?" }],
+    cp: { type: "mcq", q: "Which is more likely to damage the DNA of bacteria on a cutting board?",
+      opts: ["A very bright red lamp: more light means more damage", "A dim UV-C lamp", "Both equally, if the total energy is the same", "Neither: light cannot affect bacteria"], ans: 1,
+      hint: "Think about the energy carried by ONE photon, not the total amount of light.",
+      fb: "Damage happens one photon at a time. A red photon (1.9 eV) is too weak to break DNA bonds, so more red light only warms the board. A single UV-C photon (4.9 eV) can break a bond by itself. Brightness sets the number of photons; colour sets the energy per photon." } },
+  { title: "Refractive index and reflection", mins: 2.8 },
+  { title: "Refraction and Snell's law", mins: 3.0 },
+  { title: "Total internal reflection, refractometers and fibres", mins: 3.5 },
+  { title: "Lenses and images", mins: 3.5 },
+  { title: "The eye and the microscope", mins: 1.8 },
+  { title: "Interference", mins: 2.8 },
+  { title: "Diffraction and resolution", mins: 2.7 },
+  { title: "Polarization", mins: 2.7 },
+  { title: "Colour, spectroscopy and closing", mins: 3.2 },
+];
+const KEY = "sfs1112-optics-progress";
+let state = { done: [], home: {} };
+try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s && Array.isArray(s.done)) state = Object.assign(state, s); } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+
+const $ = (id) => document.getElementById(id);
+const vid = $("vid");
+let cur = 0, handled = new Set(), ended = false, tries = 0;
+
+function unlocked(i) { return i === 0 || state.done.includes(i - 1); }
+function renderRail() {
+  const box = $("chapters"); box.innerHTML = "";
+  SEGMENTS.forEach((s, i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chap" + (i === cur ? " cur" : "") + (state.done.includes(i) ? " done" : "");
+    const open = unlocked(i) && s.src;
+    b.disabled = !open;
+    b.innerHTML = `<span class="n">${state.done.includes(i) ? "✓" : i + 1}</span><span class="t"></span><span class="d">${open ? s.mins.toFixed(1) + " min" : "locked"}</span>`;
+    b.querySelector(".t").textContent = s.title;
+    b.addEventListener("click", () => load(i));
+    box.appendChild(b);
+  });
+  const n = state.done.filter((i) => i < SEGMENTS.length).length;
+  $("progBar").style.width = (100 * n / SEGMENTS.length) + "%";
+}
+
+function load(i) {
+  cur = i; handled = new Set(); ended = false; tries = 0;
+  const s = SEGMENTS[i];
+  $("segTitle").textContent = `${i + 1}. ${s.title}`;
+  $("segMeta").textContent = `Segment ${i + 1} of ${SEGMENTS.length} · about ${s.mins.toFixed(1)} min`;
+  $("pauseCard").hidden = true;
+  if (s.src) {
+    $("lockedStage").hidden = true; vid.hidden = false;
+    if (!vid.currentSrc.endsWith(s.src)) { vid.poster = s.poster; vid.querySelector("source").src = s.src; vid.load(); }
+  } else {
+    vid.pause(); vid.hidden = true; $("lockedStage").hidden = false;
+    $("lockTitle").textContent = "Not produced yet";
+    $("lockText").textContent = "This pilot contains Segment 1 only.";
+  }
+  renderCP(); renderRail();
+}
+
+function renderCP() {
+  const s = SEGMENTS[cur], box = $("cp");
+  box.className = "cp"; box.innerHTML = "";
+  if (!s.cp) { box.classList.add("wait"); box.textContent = "No checkpoint in the pilot for this segment."; return; }
+  if (!ended && !state.done.includes(cur)) {
+    box.classList.add("wait");
+    box.innerHTML = `<span class="tag">Checkpoint ${cur + 1}</span><div>The checkpoint opens when the video ends. You can rewatch any part first.</div>`;
+    return;
+  }
+  const tag = document.createElement("span"); tag.className = "tag"; tag.textContent = `Checkpoint ${cur + 1}`;
+  const h = document.createElement("h3"); h.textContent = s.cp.q;
+  const fb = document.createElement("div"); fb.id = "fb";
+  box.append(tag, h);
+  if (s.cp.type === "mcq") {
+    const opts = document.createElement("div"); opts.className = "opts";
+    s.cp.opts.forEach((o, k) => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "opt"; b.id = `opt${k}`;
+      b.innerHTML = `<span class="k">${"ABCD"[k]}</span><span></span>`; b.lastChild.textContent = o;
+      b.addEventListener("click", () => answer(k === s.cp.ans, b, opts));
+      opts.appendChild(b);
+    });
+    box.appendChild(opts);
+  } else {
+    const row = document.createElement("div"); row.className = "num";
+    row.innerHTML = `<input id="numIn" inputmode="decimal" aria-label="Your answer"> <span>${s.cp.unit || ""}</span> <button type="button" id="numGo">Check</button>`;
+    box.appendChild(row);
+    row.querySelector("#numGo").addEventListener("click", () => {
+      const v = parseFloat(row.querySelector("#numIn").value.replace(",", "."));
+      answer(!isNaN(v) && v >= s.cp.lo && v <= s.cp.hi, null, null);
+    });
+  }
+  box.appendChild(fb);
+  if (state.done.includes(cur)) showResult(true, true);
+}
+
+function answer(ok, btn, opts) {
+  const s = SEGMENTS[cur];
+  tries++;
+  if (btn) btn.classList.add(ok ? "right" : "wrong");
+  if (ok || tries >= 2) {
+    if (opts) { opts.querySelectorAll(".opt").forEach((b) => b.disabled = true); $("opt" + s.cp.ans).classList.add("right"); }
+    showResult(ok, false);
+    if (!state.done.includes(cur)) { state.done.push(cur); save(); }
+    renderRail();
+  } else {
+    $("fb").className = "fb no"; $("fb").innerHTML = `<b>Not quite. One more try.</b>`; $("fb").append(s.cp.hint);
+    if (btn) btn.disabled = true;
+  }
+}
+function showResult(ok, revisit) {
+  const s = SEGMENTS[cur], fb = $("fb");
+  fb.className = "fb " + (ok ? "ok" : "no");
+  fb.innerHTML = `<b>${revisit ? "Answered. Here is the explanation again." : ok ? "Correct." : "Here is the answer."}</b>`;
+  fb.append(s.cp.fb);
+  const next = SEGMENTS[cur + 1];
+  if (next) {
+    const b = document.createElement("button"); b.type = "button"; b.style.marginTop = "12px"; b.style.display = "block";
+    b.textContent = next.src ? `Continue to Segment ${cur + 2}` : "End of the pilot";
+    b.disabled = !next.src;
+    b.addEventListener("click", () => { load(cur + 1); window.scrollTo({ top: 0, behavior: "smooth" }); });
+    fb.appendChild(b);
+  }
+}
+
+vid.addEventListener("timeupdate", () => {
+  const s = SEGMENTS[cur]; if (!s.pauses) return;
+  for (const p of s.pauses) {
+    if (!handled.has(p.t) && vid.currentTime >= p.t && vid.currentTime < p.t + 1.5) {
+      handled.add(p.t); vid.pause();
+      $("pausePrompt").textContent = p.prompt; $("pauseCard").hidden = false; $("pauseGo").focus();
+    }
+  }
+});
+let ccOn = true;
+function drawCC() {
+  const s = SEGMENTS[cur], t = vid.currentTime, box = $("cc");
+  const c = ccOn && s.caps ? s.caps.find((q) => t >= q[0] && t < q[1]) : null;
+  const txt = c ? c[2] : "";
+  if (box.dataset.t !== txt) { box.dataset.t = txt; box.innerHTML = txt ? "<span></span>" : ""; if (txt) box.firstChild.textContent = txt; }
+}
+vid.addEventListener("timeupdate", drawCC);
+vid.addEventListener("seeked", drawCC);
+$("ccBtn").addEventListener("click", () => { ccOn = !ccOn; $("ccBtn").textContent = ccOn ? "Captions on" : "Captions off"; $("ccBtn").setAttribute("aria-pressed", String(ccOn)); drawCC(); });
+vid.addEventListener("seeked", () => { const s = SEGMENTS[cur]; (s.pauses || []).forEach((p) => { if (vid.currentTime > p.t + 1.5) handled.add(p.t); }); });
+vid.addEventListener("play", () => { $("pauseCard").hidden = true; });
+$("pauseGo").addEventListener("click", () => { $("pauseCard").hidden = true; vid.play().catch(() => {}); });
+vid.addEventListener("ended", () => { ended = true; renderCP(); $("cp").scrollIntoView({ behavior: "smooth", block: "start" }); });
+
+["h1", "h2", "h3", "h4"].forEach((id) => {
+  const el = $(id); el.checked = !!state.home[id];
+  el.addEventListener("change", () => { state.home[id] = el.checked; save(); });
+});
+load(0);
+</script>
+
+</body>
+</html>
