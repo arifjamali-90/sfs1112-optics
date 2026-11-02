@@ -58,10 +58,10 @@ document.getElementById("f").addEventListener("submit", (e) => {
   e.preventDefault();
   const v = (id) => document.getElementById(id).value.trim();
   const expected = checkCode(v("name"), v("matric"), parseInt(v("ok"), 10), parseInt(v("first"), 10), parseInt(v("exit"), 10), v("day"));
-  const given = v("code").toUpperCase().replace(/\s+/g, "");
+  const given = v("code").toUpperCase().replace(/[\s-]+/g, "");
   const out = document.getElementById("out"); out.hidden = false;
-  if (given === expected) { out.className = "out ok"; out.innerHTML = "<b>Matches.</b> The details on this slip are the ones the lecture page produced."; }
-  else { out.className = "out no"; out.innerHTML = "<b>Does not match.</b> Expected <code></code>. Check for typos in the name, matric number or date before treating the slip as edited."; out.querySelector("code").textContent = expected; }
+  if (given === expected.replace("-", "")) { out.className = "out ok"; out.innerHTML = "<b>Matches.</b> The details on this slip are the ones the lecture page produced."; }
+  else { out.className = "out no"; out.innerHTML = "<b>Does not match.</b> Check for typos in the name, matric number or date before treating the slip as edited."; }
 });
 </script>
 </body>
